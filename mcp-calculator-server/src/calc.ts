@@ -11,6 +11,7 @@ import express, { Request, Response } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
+const PORT_NUMBER = 3000;
 // const serverParams: ServerRegistrationRequest = {
 //   name: "CalculatorServer",
 //   slug: "calculator-server",
@@ -153,7 +154,7 @@ app.get("/messages/hit-count", (_: Request, res: Response) => {
   res.json({ hitCount: messageHitCount });
 });
 
-console.log("Server starting on http://localhost:3001");
-app.listen(3001, () => {
-  console.log("Server running on http://localhost:3001");
+console.log(`Server starting on http://localhost:${PORT_NUMBER}`);
+app.listen(PORT_NUMBER, () => {
+  console.log(`Server running on http://localhost:${PORT_NUMBER}`);
 });
