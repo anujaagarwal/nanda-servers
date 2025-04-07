@@ -11,7 +11,7 @@ import express, { Request, Response } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const PORT_NUMBER = 3000;
+const PORT_NUMBER = 8080;
 // const serverParams: ServerRegistrationRequest = {
 //   name: "CalculatorServer",
 //   slug: "calculator-server",
