@@ -521,6 +521,8 @@ async def complex_tool(param: str) -> str:
 
 Connect to the NANDA client through our [web interface](https://main.dayer1hj1pz2p.amplifyapp.com).
 
+<img width="798" alt="image" src="https://github.com/user-attachments/assets/9050e38e-17f2-4b14-b37c-bf4fdcc0f493" />
+
 ### Adding a New Server
 
 - Server ID
@@ -529,7 +531,7 @@ Connect to the NANDA client through our [web interface](https://main.dayer1hj1pz
     - Set a clear, descriptive name for easy identification
 - Server URL
     - Specify the SSE endpoint URL for your NANDA server
-
+<img width="553" alt="image" src="https://github.com/user-attachments/assets/798ea564-268c-47c8-8604-828c7609c269" />
 
 
 ## API Reference
