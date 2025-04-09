@@ -17,7 +17,7 @@
 
 ## Introduction
 
-This guide provides comprehensive documentation on building a Model Context Protocol (MCP) server using Server-Sent Events (SSE) transport in Python. It's designed for companies that want to expose their APIs to MCP-compatible clients like Claude Desktop, Cursor, Continue, and others.
+This guide provides clear documentation for building a Model Context Protocol (MCP) server using Server-Sent Events (SSE) in Python. It’s designed for companies that want to expose their APIs to the NANDA client.
 
 ## What is MCP?
 
