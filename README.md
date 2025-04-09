@@ -12,7 +12,7 @@
 - [Advanced Configuration](#advanced-configuration)
 - [Best Practices](#best-practices)
 - [Troubleshooting](#troubleshooting)
-- [Integration with NANDA](#integration-with-mcp-clients)
+- [Integration with NANDA Client](#integration-with-nanda-client)
 - [API Reference](#api-reference)
 
 ## Introduction
