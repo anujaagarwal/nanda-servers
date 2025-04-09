@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP SSE Test Client</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.5; padding: 1em; }
+        label, input, textarea, button { display: block; margin-bottom: 0.5em; }
+        input, textarea { width: 90%; max-width: 600px; padding: 0.3em; }
+        textarea { height: 8em; }
+        #logs { height: 300px; width: 90%; max-width: 600px; border: 1px solid #ccc; overflow-y: scroll; background-color: #f8f8f8; padding: 0.5em; white-space: pre-wrap; font-family: monospace; }
+        .error { color: red; }
+        .info { color: blue; }
+        .sent { color: darkmagenta; }
+        .received { color: darkgreen; }
+    </style>
+</head>
+<body>
+
+<h1>MCP SSE Test Client</h1>
+
+<label for="serverUrl">Server Base URL:</label>
+<input type="text" id="serverUrl" value="http://localhost:8000">
+<button id="connectBtn">Connect SSE</button>
+<button id="disconnectBtn" disabled>Disconnect SSE</button>
+<p id="connectionStatus" class="info">Status: Disconnected</p>
+
+<hr>
+
+<div>
+    <label for="toolName">Tool Name:</label>
+    <input type="text" id="toolName" placeholder="e.g., get_current_weather">
+
+    <label for="toolArgs">Tool Arguments (JSON):</label>
+    <textarea id="toolArgs" placeholder='e.g., { "location": "London, UK" }'></textarea>
+
+    <button id="sendToolCallBtn" disabled>Send tools/call Request</button>
+</div>
+
+<hr>
+
+<h2>Logs / Server Responses</h2>
+<div id="logs"></div>
+
+<script>
+    const serverUrlInput = document.getElementById('serverUrl');
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const toolNameInput = document.getElementById('toolName');
+    const toolArgsInput = document.getElementById('toolArgs');
+    const sendToolCallBtn = document.getElementById('sendToolCallBtn');
+    const logsDiv = document.getElementById('logs');
+
+    let eventSource = null;
+    let messageUrl = null; // URL for sending POST messages
+    let nextRequestId = 1;
+
+    function logMessage(message, type = 'info') {
+        const p = document.createElement('p');
+        p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        p.classList.add(type);
+        logsDiv.appendChild(p);
+        logsDiv.scrollTop = logsDiv.scrollHeight; // Auto-scroll
+        console.log(message);
+    }
+
+    function connectSSE() {
+        const baseUrl = serverUrlInput.value.trim();
+        if (!baseUrl) {
+            logMessage('Server Base URL cannot be empty.', 'error');
+            return;
+        }
+        const sseUrl = `${baseUrl}/sse`;
+
+        logMessage(`Attempting to connect to SSE endpoint: ${sseUrl}`, 'info');
+        connectionStatus.textContent = 'Status: Connecting...';
+        connectionStatus.className = 'info';
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        sendToolCallBtn.disabled = true; // Disable until messageUrl is known
+        messageUrl = null; // Reset messageUrl
+
+        try {
+            eventSource = new EventSource(sseUrl);
+        } catch (e) {
+            logMessage(`Error creating EventSource: ${e.message}`, 'error');
+            connectionStatus.textContent = 'Status: Error';
+            connectionStatus.className = 'error';
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            return;
+        }
+
+        eventSource.onopen = () => {
+            logMessage('SSE Connection Opened.', 'info');
+            connectionStatus.textContent = 'Status: Connected, waiting for endpoint...';
+            connectionStatus.className = 'info';
+        };
+
+        eventSource.onerror = (error) => {
+            logMessage(`SSE Error: ${error.type || 'Unknown error'}. ReadyState: ${eventSource.readyState}`, 'error');
+            console.error('SSE Error Event:', error);
+            connectionStatus.textContent = `Status: Error (${error.type || 'Unknown'})`;
+            connectionStatus.className = 'error';
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            sendToolCallBtn.disabled = true;
+            eventSource.close(); // Close on error
+        };
+
+        eventSource.addEventListener('endpoint', (event) => {
+            const endpointData = event.data;
+            logMessage(`Received 'endpoint' event: ${endpointData}`, 'received');
+            // Construct the full message URL
+            const url = new URL(baseUrl); // Use base URL to get origin
+            messageUrl = `${url.origin}${endpointData}`;
+            logMessage(`Message URL set to: ${messageUrl}`, 'info');
+            connectionStatus.textContent = 'Status: Connected & Ready';
+            connectionStatus.className = 'received';
+            sendToolCallBtn.disabled = false; // Enable sending tool calls
+        });
+
+        eventSource.onmessage = (event) => {
+            logMessage(`Received message: ${event.data}`, 'received');
+            // Here you would parse event.data (JSON-RPC response) and display nicely
+        };
+    }
+
+    function disconnectSSE() {
+        if (eventSource) {
+            eventSource.close();
+            logMessage('SSE Connection Closed by user.', 'info');
+            connectionStatus.textContent = 'Status: Disconnected';
+            connectionStatus.className = 'info';
+        }
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+        sendToolCallBtn.disabled = true;
+        messageUrl = null;
+    }
+
+    async function sendToolCall() {
+        const toolName = toolNameInput.value.trim();
+        const argsString = toolArgsInput.value.trim();
+
+        if (!messageUrl) {
+            logMessage('Cannot send: Message URL not yet received from server.', 'error');
+            return;
+        }
+        if (!toolName) {
+            logMessage('Cannot send: Tool Name is empty.', 'error');
+            return;
+        }
+
+        let argsObject = {};
+        if (argsString) {
+            try {
+                argsObject = JSON.parse(argsString);
+            } catch (e) {
+                logMessage(`Cannot send: Tool Arguments are not valid JSON. Error: ${e.message}`, 'error');
+                return;
+            }
+        }
+
+        const requestId = `tool-${nextRequestId++}`;
+        const requestBody = {
+            jsonrpc: "2.0",
+            id: requestId,
+            method: "tools/call",
+            params: {
+                name: toolName,
+                arguments: argsObject
+            }
+        };
+
+        logMessage(`Sending POST to ${messageUrl}: ${JSON.stringify(requestBody, null, 2)}`, 'sent');
+        sendToolCallBtn.disabled = true; // Prevent spamming
+
+        try {
+            const response = await fetch(messageUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            logMessage(`POST response status: ${response.status} ${response.statusText}`, response.ok ? 'info' : 'error');
+            if (!response.ok) {
+                const errorText = await response.text();
+                logMessage(`POST response body: ${errorText}`, 'error');
+            }
+            // Response to the tool call will arrive via the SSE connection
+
+        } catch (error) {
+            logMessage(`Error sending POST request: ${error.message}`, 'error');
+        } finally {
+           if (eventSource && eventSource.readyState === EventSource.OPEN) {
+               sendToolCallBtn.disabled = false; // Re-enable button if SSE still open
+           }
+        }
+    }
+
+    connectBtn.addEventListener('click', connectSSE);
+    disconnectBtn.addEventListener('click', disconnectSSE);
+    sendToolCallBtn.addEventListener('click', sendToolCall);
+
+    // Optional: Auto-connect on load
+    // connectSSE();
+
+</script>
+
+</body>
+</html> 
