@@ -563,8 +563,7 @@ mcp = FastMCP(
 
 For more detailed information, refer to:
 
-1. [Model Context Protocol documentation](https://modelcontextprotocol.io/docs/)
-2. [Python SDK documentation](https://modelcontextprotocol.io/python-sdk/)
-3. [MCP Specification](https://modelcontextprotocol.io/spec/)
+1. [Model Context Protocol documentation](https://modelcontextprotocol.io/introduction)
+2. [Python SDK documentation](https://github.com/modelcontextprotocol/python-sdk)
 
-For questions and community support, visit our [GitHub Discussions](https://github.com/modelcontextprotocol/python-sdk/discussions). 
+For questions and community support, email dec-ai@media.mit.edu
