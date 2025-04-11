@@ -220,7 +220,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     )
 
 # Create and run Starlette app
-app = create_starlette_app(mcp.mcp_server, debug=True)
+app = create_starlette_app(mcp._mcp_server, debug=True)
 
 
 if __name__ == "__main__":
