@@ -1,5 +1,6 @@
 starlette==0.15.0
 uvicorn==0.17.6
-httpx>=0.28.1
-mcp[cli]>=1.6.0
+httpx==0.23.0  # downgrade to an older version that works with the others
+mcp[cli]==1.6.0  # or any other compatible version of mcp[cli]
+
 
