@@ -219,9 +219,11 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
         ],
     )
 
-if __name__ == "__main__":
-    mcp_server = mcp._mcp_server
-    
     # Create and run Starlette app
-    app = create_starlette_app(mcp_server, debug=True)
+app = create_starlette_app(mcp.mcp_server, debug=True)
+
+
+if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
+
+    
