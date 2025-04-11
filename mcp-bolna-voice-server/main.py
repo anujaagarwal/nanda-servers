@@ -208,8 +208,12 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
             await mcp_server.run(
                 read_stream,
                 write_stream,
-                mcp_server.create_initialization_options(),
+                mcp_server.create_initialization_options()
             )
+
+    
+    # Ensure you're not doing any additional response handling here after sending the SSE stream
+
 
     return Starlette(
         debug=debug,
