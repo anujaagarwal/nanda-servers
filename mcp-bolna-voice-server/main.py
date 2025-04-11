@@ -223,5 +223,5 @@ if __name__ == "__main__":
     mcp_server = mcp._mcp_server
     
     # Create and run Starlette app
-    starlette_app = create_starlette_app(mcp_server, debug=True)
-    uvicorn.run(starlette_app, host="0.0.0.0", port=8080)
+    app = create_starlette_app(mcp_server, debug=True)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
