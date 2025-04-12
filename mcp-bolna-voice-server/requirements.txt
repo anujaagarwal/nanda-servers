@@ -1,5 +1,5 @@
-# starlette==0.14.2
-# uvicorn==0.15.0
+starlette
+uvicorn
 httpx>=0.28.1
 mcp[cli]>=1.6.0
 # Or the version you're using
